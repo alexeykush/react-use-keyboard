@@ -1,44 +1,41 @@
-import {useEffect} from "react";
+import {useEffect, useRef, useCallback} from "react";
 
-import {KEYBOARD} from "./constants";
+const mapToArray = data => Array.isArray(data) ? data : [data];
 
 /**
  * @param config {( Array<{keys: Array<number>, handler: function}>|Array<{ keys: Array<Array<number>>, handler: function )}> }
+ * @param target {Document | Element | Window}
 */
-const useKeyboard = config => {
+const useKeyboard = (config, target = document) => {
+    const buffer = useRef([]).current;
+
+    const isMatch = useCallback(keys => (
+        keys.length === buffer.length &&
+        mapToArray(keys).every((keyCode, index) => buffer.indexOf(keyCode) === index)
+    ), []);
+
     useEffect(() => {
-        const buffer = [];
         const handleKeyDown = e => {
-            if (!buffer.includes(e.keyCode)) {
-                buffer.push(e.keyCode);
-            }
+            if (!buffer.includes(e.keyCode)) buffer.push(e.keyCode);
 
-            const isMatch = keys => (
-                keys.length === buffer.length &&
-                keys.every((keyCode, index) => buffer.indexOf(keyCode) === index)
-            );
-
-            const existing = config.find( ({keys}) => Array.isArray(keys[0]) ? keys.some(isMatch) : isMatch(keys));
-            if (existing) {
-                existing.handler(e);
-            }
+            config
+                .filter(({keys}) => Array.isArray(keys[0]) ? keys.some(isMatch) : isMatch(keys))
+                .forEach(item => item.handler(e));
         };
+
         const handleKeyUp = e => {
             const index = buffer.indexOf(e.keyCode);
-            if (~index) {
-                buffer.splice(index, 1);
-            }
+            if (~index) buffer.splice(index, 1);
         };
 
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("keyup", handleKeyUp);
+        target.addEventListener("keydown", handleKeyDown);
+        target.addEventListener("keyup", handleKeyUp);
+
         return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("keyup", handleKeyUp);
+            target.removeEventListener("keydown", handleKeyDown);
+            target.removeEventListener("keyup", handleKeyUp);
         };
-    }, []);
+    }, [config]);
 };
-
-export {KEYBOARD};
 
 export default useKeyboard;
