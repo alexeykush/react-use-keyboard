@@ -1,6 +1,6 @@
 {
   "name": "@alexkush/react-use-keyboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {},
@@ -19,5 +19,8 @@
   "peerDependencies": {
     "react": "^16.8.6"
   },
-  "repository": { "type": "git", "url": "https://github.com/alexeykush/react-use-keyboard" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexeykush/react-use-keyboard"
+  }
 }
